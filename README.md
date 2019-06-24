@@ -17,7 +17,7 @@ Deploy Alert Manager:
 ```
 cat resources/alertmanager-server.yaml | \
     sed "s/ALERTMANAGER_SLACK_WEBHOOK/$ALERTMANAGER_SLACK_WEBHOOK" | \
-	oc apply -f -
+    oc apply -f -
 ```
 
 Deploy Prometheus:
