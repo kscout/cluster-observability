@@ -1,0 +1,74 @@
+apiVersion: operators.coreos.com/v1alpha2
+kind: OperatorGroup
+metadata:
+  name: operatorgroup
+  namespace: kscout
+  labels:
+    app: prometheus
+    component: operator
+    env: prod
+spec:
+  targetNamespaces:
+  - kscout
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: prometheus
+  namespace: kscout
+  labels:
+    app: prometheus
+    component: operator
+    env: prod
+spec:
+  channel: beta
+  name: prometheus
+  source: operatorhubio-catalog
+  sourceNamespace: olm
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  name: prometheus
+  labels:
+    app: prometheus
+    component: prometheus
+    env: prod
+spec:
+  replicas: 3
+  version: v2.10.0
+  alerting:
+    alertmanagers:
+      - name: alertmanager
+        namespace: kscout
+        port: web
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  labels:
+    app: prometheus
+    component: prometheus
+    env: prod
+spec:
+  type: NodePort
+  ports:
+  - name: web
+    nodePort: 30900
+    port: 9090
+    protocol: TCP
+    targetPort: web
+  selector:
+    prometheus: prometheus
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Alertmanager
+metadata:
+  name: alertmanager
+  labels:
+    app: prometheus
+    component: alertmanager
+    env: prod
+spec:
+  replicas: 3

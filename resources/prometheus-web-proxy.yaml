@@ -1,0 +1,79 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-web-proxy-caddyfile
+  labels:
+    app: prometheus
+    component: web-proxy
+    env: prod
+data:
+  Caddyfile: |
+    http://*:9091 {
+      proxy / :30900
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-web-proxy
+  labels:
+    app: prometheus
+    component: web-proxy
+    env: prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+      component: web-proxy
+      env: prod
+  template:
+    metadata:
+      labels:
+        app: prometheus
+        component: web-proxy
+        env: prod
+    spec:
+      volumes:
+        - name: web-proxy-caddyfile
+          configMap:
+            name: prometheus-web-proxy-caddyfile
+      containers:
+        - name: caddy
+          image: docker.io/kscout/caddy:v0.1.0
+          volumeMounts:
+            - name: web-proxy-caddyfile
+              mountPath: /mnt
+          ports:
+            - name: http
+              containerPort: 9091
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+              scheme: HTTP
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+              scheme: HTTP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-web-proxy
+  labels:
+    app: prometheus
+    component: web-proxy
+    env: prod
+spec:
+  selector:
+    app: prometheus
+    component: web-proxy
+    env: prod
+  ports:
+    - name: web
+      port: 9091
+      protocol: TCP
+      targetPort: web      
