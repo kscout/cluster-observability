@@ -1,33 +1,67 @@
-apiVersion: operators.coreos.com/v1alpha2
-kind: OperatorGroup
+apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: operatorgroup
-  namespace: kscout
+  name: prometheus-config
   labels:
     app: prometheus
-    component: operator
+    component: prometheus
     env: prod
-spec:
-  targetNamespaces:
-  - kscout
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval:     15s
+      evaluation_interval: 15s
+
+    alerting:
+      alertmanagers:
+      - static_configs:
+        - targets:
+           - alertmanager:9093
+           
+    rule_files:
+      - "/mnt/config/alert_rules.yml"
+      
+    scrape_configs:
+      - job_name: 'prometheus'
+        static_configs:
+        - targets: ['localhost:9090'] # Prometheus self metrics
+
+      - job_name: 'services'
+        static_configs:
+        - targets:
+            - 'prod-serverless-registry-api-metrics:9180' # Serverless registry API
+  alert_rules.yml: |
+    groups:
+      - name: serverless-registry-api
+        rules:
+          - alert: Serverless Registry API Down
+            expr: up{instance="prod-serverless-registry-api-metrics:9180"} < 1
+            for: 1m
+            labels:
+              severity: high
+              maintainers: '@Noah-Huppert @pmahajan'
+            annotations:
+              summary: Serverless Registry API Down
+              description: No metrics received from the Serverless Registry API proxy for at least 1 minute.
 ---
-apiVersion: operators.coreos.com/v1alpha1
-kind: Subscription
+apiVersion: v1
+kind: PersistentVolumeClaim
 metadata:
-  name: prometheus
-  namespace: kscout
+  name: prometheus-data
   labels:
     app: prometheus
-    component: operator
+    component: prometheus
     env: prod
 spec:
-  channel: beta
-  name: prometheus
-  source: operatorhubio-catalog
-  sourceNamespace: olm
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 10Gi
 ---
-apiVersion: monitoring.coreos.com/v1
-kind: Prometheus
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: prometheus
   labels:
@@ -35,13 +69,51 @@ metadata:
     component: prometheus
     env: prod
 spec:
-  replicas: 3
-  version: v2.10.0
-  alerting:
-    alertmanagers:
-      - name: alertmanager
-        namespace: kscout
-        port: web
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+      component: prometheus
+      env: prod
+  template:
+    metadata:
+      labels:
+        app: prometheus
+        component: prometheus
+        env: prod
+    spec:
+      volumes:
+        - name: prometheus-config
+          configMap:
+            name: prometheus-config
+        - name: prometheus-data
+          persistentVolumeClaim:
+            claimName: prometheus-data
+      containers:
+        - name: prometheus
+          image: quay.io/prometheus/prometheus:latest
+          volumeMounts:
+            - name: prometheus-config
+              mountPath: /mnt/config
+            - name: prometheus-data
+              mountPath: /mnt/data
+          args:
+            - "--config.file=/mnt/config/prometheus.yml"
+            - "--storage.tsdb.path=/mnt/data"
+          ports:
+            - name: web
+              containerPort: 9090
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: web
+              scheme: HTTP
+          readinessProbe:
+            httpGet:
+              path: /
+              port: web
+              scheme: HTTP
 ---
 apiVersion: v1
 kind: Service
@@ -55,20 +127,11 @@ spec:
   type: NodePort
   ports:
   - name: web
-    nodePort: 30900
     port: 9090
+    nodePort: 30900
     protocol: TCP
     targetPort: web
   selector:
-    prometheus: prometheus
----
-apiVersion: monitoring.coreos.com/v1
-kind: Alertmanager
-metadata:
-  name: alertmanager
-  labels:
     app: prometheus
-    component: alertmanager
+    component: prometheus
     env: prod
-spec:
-  replicas: 3
