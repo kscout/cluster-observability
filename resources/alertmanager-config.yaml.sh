@@ -113,10 +113,10 @@ data:
         api_url: '$ALERTMANAGER_SLACK_WEBHOOK'
         text: |
           {{ range .Alerts }}
-            *Alert*: {{ .Annotations.summary }}
-            *Description*: {{ .Annotations.description }}
-            *Maintainers*: {{ .Labels.maintainers }}
-            *Severity*: {{ .Labels.severity }}
+          *Alert*: {{ .Annotations.summary }}
+          *Description*: {{ .Annotations.description }}
+          *Maintainers*: {{ .Labels.maintainers }}
+          *Severity*: {{ .Labels.severity }}
           {{ end }}
         send_resolved: true
         link_names: true
