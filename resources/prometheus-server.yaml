@@ -39,7 +39,7 @@ data:
             for: 1m
             labels:
               severity: high
-              maintainers: '@Noah-Huppert @pmahajan'
+              maintainers: '@nhuppert @pmahajan'
             annotations:
               summary: Serverless Registry API Down
               description: No metrics received from the Serverless Registry API proxy for at least 1 minute.
