@@ -30,6 +30,7 @@ data:
         static_configs:
         - targets:
             - 'prod-serverless-registry-api-metrics:9180' # Serverless registry API
+            - 'prod-site-metrics:9180' # Site
   alert_rules.yml: |
     groups:
       - name: serverless-registry-api
@@ -43,6 +44,17 @@ data:
             annotations:
               summary: Serverless Registry API Down
               description: No metrics received from the Serverless Registry API proxy for at least 1 minute.
+      - name: site
+        rules:
+          - alert: Site Down
+            expr: up{instance="prod-site-metrics:9180"} < 1
+            for: 1m
+            labels:
+              severity: high
+              maintainers: '@jawalter'
+            annotations:
+              summary: Site Down
+              description: No metrics received from the site proxy for at least 1 minute.
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
