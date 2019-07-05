@@ -6,7 +6,7 @@ MAKE ?= make
 APP ?= observability
 
 KUBE_LABELS ?= app=${APP},env=${ENV}
-KUBE_TYPES ?= dc,configmap,secret,deploy,statefulset,svc,route,is,pod,pv,pvc
+KUBE_TYPES ?= deployment,configmap,service,pvc
 
 KUBE_APPLY ?= oc apply -f -
 
@@ -16,7 +16,7 @@ deploy:
 	helm template \
 		--values values.yaml \
 		--values values.secrets.${ENV}.yaml \
-		--set global.env=${ENV} deploy \
+		--set global.env=${ENV} . \
 	| ${KUBE_APPLY}
 
 # deploy to production
