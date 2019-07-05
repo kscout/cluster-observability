@@ -36,7 +36,7 @@ data:
   alert_rules.yml: |
     groups:
     {{ range .Values.services }}
-    {{- $_ := dict "env" $.Values.global.env "name" .name -}}
+    {{ $_ := dict "env" $.Values.global.env "name" .name }}
       - name: {{ .name }}
         rules:
           - alert: {{ template "cluster-observability.title-name" . }} Metrics Down
