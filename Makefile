@@ -14,7 +14,8 @@ KUBE_APPLY ?= oc apply -f -
 deploy:
 	@if [ -z "${ENV}" ]; then echo "ENV must be set"; exit 1; fi
 	helm template \
-		--values deploy/values.yaml \
+		--values values.yaml \
+		--values values.secrets.${ENV}.yaml \
 		--set global.env=${ENV} deploy \
 	| ${KUBE_APPLY}
 
