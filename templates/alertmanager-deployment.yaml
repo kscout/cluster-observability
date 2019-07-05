@@ -1,48 +1,32 @@
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: alertmanager-data
-  labels:
-    app: prometheus
-    component: alertmanager
-    env: prod
-spec:
-  accessModes:
-    - ReadWriteOnce
-  volumeMode: Filesystem
-  resources:
-    requests:
-      storage: 1Gi
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: alertmanager
+  name: {{ .Values.global.env }}-alertmanager
   labels:
-    app: prometheus
+    app: {{ .Values.global.app }}
     component: alertmanager
-    env: prod
+    env: {{ .Values.global.env }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: prometheus
+      app: {{ .Values.global.app }}
       component: alertmanager
-      env: prod
+      env: {{ .Values.global.env }}
   template:
     metadata:
       labels:
-        app: prometheus
+        app: {{ .Values.global.app }}
         component: alertmanager
-        env: prod
+        env: {{ .Values.global.env }}
     spec:
       volumes:
         - name: alertmanager-config
           configMap:
-            name: alertmanager-config
+            name: {{ .Values.global.env }}-alertmanager-config
         - name: alertmanager-data
           persistentVolumeClaim:
-            claimName: alertmanager-data
+            claimName: {{ .Values.global.env }}-alertmanager-data
       containers:
         - name: alertmanager
           image: quay.io/prometheus/alertmanager:latest
@@ -68,24 +52,3 @@ spec:
               path: /
               port: web
               scheme: HTTP
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: alertmanager
-  labels:
-    app: prometheus
-    component: alertmanager
-    env: prod
-spec:
-  type: NodePort
-  ports:
-  - name: web
-    port: 9093
-    nodePort: 30930
-    protocol: TCP
-    targetPort: web
-  selector:
-    app: prometheus
-    component: alertmanager
-    env: prod

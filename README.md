@@ -1,26 +1,27 @@
 # Cluster Observability
-Prometheus configuration for kscout.io OpenShift cluster.
+Prometheus + Alert Manager configuration for kscout.io OpenShift cluster.
 
 # Table Of Contents
 - [Overview](#overview)
 - [Deploy](#deploy)
+- [Add Service](#add-service)
 
 # Overview
-Deployment for Prometheus operator.
+Deployment for Prometheus + Alert Manager observability stack.
 
 # Deploy
-Set the `ALERTMANAGER_SLACK_WEBHOOK` environment variable to the alert manager's
-Slack web hook.
+1. Make a copy of `values.secrets.example.yaml` named 
+   `values.secrets.prod.yaml`. Never commit this file!
+2. Edit `values.secrets.prod.yaml` with your own values
+3. Run:
+   ```
+   make deploy-prod
+   ```
 
-Deploy Alert Manager:
+# Add Service
+To add a service to the observability stack add a value to the `services` list
+in the [`values.yaml` file](values.yaml).  
 
-```
-./resources/alertmanager-config.yaml.sh | oc apply -f -
-oc apply -f resources/alertmanager-server.yaml
-```
+See the comment explaining this array and existing entries for more information.
 
-Deploy Prometheus:
-
-```
-oc apply -f resources/prometheus-server.yaml
-```
+This will trigger alerts when the service goes down.

@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.global.env }}-alertmanager
+  labels:
+    app: {{ .Values.global.app }}
+    component: alertmanager
+    env: {{ .Values.global.env }}
+spec:
+  type: NodePort
+  ports:
+  - name: web
+    port: 9093
+    nodePort: 30930
+    protocol: TCP
+    targetPort: web
+  selector:
+    app: {{ .Values.global.app }}
+    component: alertmanager
+    env: {{ .Values.global.env }}

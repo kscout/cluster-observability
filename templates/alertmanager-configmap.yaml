@@ -1,18 +1,11 @@
-#!/usr/bin/env bash
-if [ -z "$ALERTMANAGER_SLACK_WEBHOOK" ]; then
-    echo "Error: ALERTMANAGER_SLACK_WEBHOOK environment variable must be set" >&2
-    exit 1
-fi
-
-cat <<EOF
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: alertmanager-config
+  name: {{ .Values.global.env }}-alertmanager-config
   labels:
-    app: prometheus
+    app: {{ .Values.global.app }}
     component: alertmanager
-    env: prod
+    env: {{ .Values.global.env }}
 data:
   alertmanager.yml: |
     global: {}
@@ -30,7 +23,7 @@ data:
       # alerts as-is. This is unlikely to be what you want, unless you have
       # a very low alert volume or your upstream notification system performs
       # its own grouping. Example: group_by: [...]
-      group_by: ['alertname', 'service']
+      group_by: ['alertname', 'service', 'app']
 
       # When a new group of alerts is created by an incoming alert, wait at
       # least 'group_wait' to send the initial notification.
@@ -108,16 +101,19 @@ data:
 
     receivers:
     - name: kscout-slack
+      {{- if .Values.alertsEnabled }}
+      {{/*
+      A receiver with no additional configuration becomes a black hole receiver.
+      https://github.com/prometheus/alertmanager/issues/428#issuecomment-233319935
+
+      If .Values.alertsEnabled == False do not include the rest of the receiver
+      configuration. Making this receiver a black hole.
+      */}}
       slack_configs:
       - channel: '#kscout'
-        api_url: '$ALERTMANAGER_SLACK_WEBHOOK'
+        api_url: '{{ .Values.alertmanager.slack_webhook }}'
         text: |
-          {{ range .Alerts }}
-          *Alert*: {{ .Annotations.summary }}
-          *Description*: {{ .Annotations.description }}
-          *Maintainers*: {{ .Labels.maintainers }}
-          *Severity*: {{ .Labels.severity }}
-          {{ end }}
+{{ .Files.Get "_alertmanager-slack-message.tpl" | indent 10 }}
         send_resolved: true
         link_names: true
-EOF
+      {{- end }}

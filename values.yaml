@@ -1,0 +1,23 @@
+# Global chart configuration
+global:
+  app: observe
+
+  # Deployment environment
+  #env:
+
+# Specifies if alerts should be setup
+alertsEnabled: True
+
+# Services to monitor
+services:
+  #  Name of service without environment prefix or component postfix
+  #- name:
+  #  Space separated list of maintainer Slack handles
+  #  Will be pinged if an alert is triggered for this service
+  #  slack_maintainers:
+  - name: serverless-registry-api
+    slack_maintainers: '@nhuppert @pmahajan'
+  - name: site
+    slack_maintainers: '@jawalter'
+  - name: bot-api
+    slack_maintainers: '@vhire @pmahajan'

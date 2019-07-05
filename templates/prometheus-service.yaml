@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.global.env }}-prometheus
+  labels:
+    app: {{ .Values.global.app }}
+    component: prometheus
+    env: {{ .Values.global.env }}
+spec:
+  type: NodePort
+  ports:
+  - name: web
+    port: 9090
+    nodePort: 30900
+    protocol: TCP
+    targetPort: web
+  selector:
+    app: {{ .Values.global.app }}
+    component: prometheus
+    env: {{ .Values.global.env }}
