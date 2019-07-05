@@ -3,9 +3,9 @@ kind: PersistentVolumeClaim
 metadata:
   name: prometheus-data
   labels:
-    app: observability
+    app: {{ .Values.global.app }}
     component: prometheus
-    env: prod
+    env: {{ .Values.global.app }}
 spec:
   accessModes:
     - ReadWriteOnce

@@ -3,22 +3,22 @@ kind: Deployment
 metadata:
   name: prometheus
   labels:
-    app: observability
+    app: {{ .Values.global.app }}
     component: prometheus
-    env: prod
+    env: {{ .Values.global.app }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: observability
+      app: {{ .Values.global.app }}
       component: prometheus
-      env: prod
+      env: {{ .Values.global.app }}
   template:
     metadata:
       labels:
-        app: observability
+        app: {{ .Values.global.app }}
         component: prometheus
-        env: prod
+        env: {{ .Values.global.app }}
     spec:
       volumes:
         - name: prometheus-config

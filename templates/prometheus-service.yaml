@@ -3,9 +3,9 @@ kind: Service
 metadata:
   name: prometheus
   labels:
-    app: observability
+    app: {{ .Values.global.app }}
     component: prometheus
-    env: prod
+    env: {{ .Values.global.app }}
 spec:
   type: NodePort
   ports:
@@ -15,6 +15,6 @@ spec:
     protocol: TCP
     targetPort: web
   selector:
-    app: observability
+    app: {{ .Values.global.app }}
     component: prometheus
-    env: prod
+    env: {{ .Values.global.app }}

@@ -3,9 +3,9 @@ kind: ConfigMap
 metadata:
   name: prometheus-config
   labels:
-    app: observability
+    app: {{ .Values.global.app }}
     component: prometheus
-    env: prod
+    env: {{ .Values.global.app }}
 data:
   prometheus.yml: |
     global:
