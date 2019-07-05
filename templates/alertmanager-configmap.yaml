@@ -102,6 +102,13 @@ data:
     receivers:
     - name: kscout-slack
       {{- if .Values.alertsEnabled }}
+      {{/*
+      A receiver with no additional configuration becomes a black hole receiver.
+      https://github.com/prometheus/alertmanager/issues/428#issuecomment-233319935
+
+      If .Values.alertsEnabled == False do not include the rest of the receiver
+      configuration. Making this receiver a black hole.
+      */}}
       slack_configs:
       - channel: '#kscout'
         api_url: '{{ .Values.alertmanager.slack_webhook }}'
