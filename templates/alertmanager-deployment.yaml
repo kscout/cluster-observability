@@ -3,20 +3,20 @@ kind: Deployment
 metadata:
   name: alertmanager
   labels:
-    app: prometheus
+    app: observability
     component: alertmanager
     env: prod
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: prometheus
+      app: observability
       component: alertmanager
       env: prod
   template:
     metadata:
       labels:
-        app: prometheus
+        app: observability
         component: alertmanager
         env: prod
     spec:

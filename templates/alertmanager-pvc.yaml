@@ -3,7 +3,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: alertmanager-data
   labels:
-    app: prometheus
+    app: observability
     component: alertmanager
     env: prod
 spec:

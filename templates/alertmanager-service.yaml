@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: alertmanager
   labels:
-    app: prometheus
+    app: observability
     component: alertmanager
     env: prod
 spec:
@@ -15,6 +15,6 @@ spec:
     protocol: TCP
     targetPort: web
   selector:
-    app: prometheus
+    app: observability
     component: alertmanager
     env: prod

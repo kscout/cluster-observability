@@ -3,20 +3,20 @@ kind: Deployment
 metadata:
   name: prometheus
   labels:
-    app: prometheus
+    app: observability
     component: prometheus
     env: prod
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: prometheus
+      app: observability
       component: prometheus
       env: prod
   template:
     metadata:
       labels:
-        app: prometheus
+        app: observability
         component: prometheus
         env: prod
     spec:

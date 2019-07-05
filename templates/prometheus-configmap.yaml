@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: prometheus-config
   labels:
-    app: prometheus
+    app: observability
     component: prometheus
     env: prod
 data:
