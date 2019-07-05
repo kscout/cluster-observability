@@ -3,7 +3,7 @@
 
 MAKE ?= make
 
-APP ?= observe
+APP ?= observability
 
 KUBE_LABELS ?= app=${APP},env=${ENV}
 KUBE_TYPES ?= dc,configmap,secret,deploy,statefulset,svc,route,is,pod,pv,pvc
