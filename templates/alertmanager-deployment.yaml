@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: alertmanager
+  name: {{ .Values.global.env }}-alertmanager
   labels:
     app: {{ .Values.global.app }}
     component: alertmanager
@@ -23,10 +23,10 @@ spec:
       volumes:
         - name: alertmanager-config
           configMap:
-            name: alertmanager-config
+            name: {{ .Values.global.env }}-alertmanager-config
         - name: alertmanager-data
           persistentVolumeClaim:
-            claimName: alertmanager-data
+            claimName: {{ .Values.global.env }}-alertmanager-data
       containers:
         - name: alertmanager
           image: quay.io/prometheus/alertmanager:latest

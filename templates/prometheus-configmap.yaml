@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: prometheus-config
+  name: {{ .Values.global.env }}-prometheus-config
   labels:
     app: {{ .Values.global.app }}
     component: prometheus

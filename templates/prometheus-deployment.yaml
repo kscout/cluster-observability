@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: prometheus
+  name: {{ .Values.global.env }}-prometheus
   labels:
     app: {{ .Values.global.app }}
     component: prometheus
@@ -23,10 +23,10 @@ spec:
       volumes:
         - name: prometheus-config
           configMap:
-            name: prometheus-config
+            name: {{ .Values.global.env }}-prometheus-config
         - name: prometheus-data
           persistentVolumeClaim:
-            claimName: prometheus-data
+            claimName: {{ .Values.global.env }}-prometheus-data
       containers:
         - name: prometheus
           image: quay.io/prometheus/prometheus:latest

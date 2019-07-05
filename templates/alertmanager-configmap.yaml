@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: alertmanager-config
+  name: {{ .Values.global.env }}-alertmanager-config
   labels:
     app: {{ .Values.global.app }}
     component: alertmanager
