@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager
+  labels:
+    app: prometheus
+    component: alertmanager
+    env: prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+      component: alertmanager
+      env: prod
+  template:
+    metadata:
+      labels:
+        app: prometheus
+        component: alertmanager
+        env: prod
+    spec:
+      volumes:
+        - name: alertmanager-config
+          configMap:
+            name: alertmanager-config
+        - name: alertmanager-data
+          persistentVolumeClaim:
+            claimName: alertmanager-data
+      containers:
+        - name: alertmanager
+          image: quay.io/prometheus/alertmanager:latest
+          volumeMounts:
+            - name: alertmanager-config
+              mountPath: /mnt/config
+            - name: alertmanager-data
+              mountPath: /mnt/data
+          args:
+            - "--config.file=/mnt/config/alertmanager.yml"
+            - "--storage.path=/mnt/data"
+          ports:
+            - name: web
+              containerPort: 9093
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: web
+              scheme: HTTP
+          readinessProbe:
+            httpGet:
+              path: /
+              port: web
+              scheme: HTTP
