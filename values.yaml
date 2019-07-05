@@ -1,7 +1,6 @@
 # Global chart configuration
 global:
-  app: 
-# Alert manager
-#alertmanager:
-  # Incoming Slack webhook for notifications
-  #slack_webhook:
+  app: observability
+
+  # Deployment environment
+  #env:
