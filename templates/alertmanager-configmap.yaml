@@ -23,7 +23,7 @@ data:
       # alerts as-is. This is unlikely to be what you want, unless you have
       # a very low alert volume or your upstream notification system performs
       # its own grouping. Example: group_by: [...]
-      group_by: ['alertname', 'service']
+      group_by: ['alertname', 'service', 'app']
 
       # When a new group of alerts is created by an incoming alert, wait at
       # least 'group_wait' to send the initial notification.
@@ -105,11 +105,6 @@ data:
       - channel: '#kscout'
         api_url: '{{ .Values.alertmanager.slack_webhook }}'
         text: |
-          {{ range .Alerts }}
-          *Alert*: {{ .Annotations.summary }}
-          *Description*: {{ .Annotations.description }}
-          *Maintainers*: {{ .Labels.maintainers }}
-          *Severity*: {{ .Labels.severity }}
-          {{ end }}
+{{ .Files.Get "_alertmanager-slack-message.tpl" | indent 10 }}
         send_resolved: true
         link_names: true
