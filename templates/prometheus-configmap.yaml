@@ -29,29 +29,24 @@ data:
       - job_name: 'services'
         static_configs:
         - targets:
-            - 'prod-serverless-registry-api-metrics:9180' # Serverless registry API
-            - 'prod-site-metrics:9180' # Site
+            {{ range .Values.services }}
+            {{- $_ := dict "env" $.Values.global.env "name" .name -}}
+            - '{{ template "cluster-observability.metrics-svc" $_ }}:9180'
+            {{ end }}
   alert_rules.yml: |
     groups:
-      - name: serverless-registry-api
+    {{ range .Values.services }}
+    {{- $_ := dict "env" $.Values.global.env "name" .name -}}
+      - name: {{ .name }}
         rules:
-          - alert: Serverless Registry API Down
-            expr: up{instance="prod-serverless-registry-api-metrics:9180"} < 1
+          - alert: {{ template "cluster-observability.title-name" . }} Metrics Down
+            expr: up{instance="{{ template "cluster-observability.metrics-svc" $_ }}"} < 1
             for: 1m
             labels:
-              severity: high
-              maintainers: '@nhuppert @pmahajan'
+              app: {{ .name }}
+              maintainers: '{{ .slack_maintainers }}'
+              severity: critical
             annotations:
-              summary: Serverless Registry API Down
-              description: No metrics received from the Serverless Registry API proxy for at least 1 minute.
-      - name: site
-        rules:
-          - alert: Site Down
-            expr: up{instance="prod-site-metrics:9180"} < 1
-            for: 1m
-            labels:
-              severity: high
-              maintainers: '@jawalter'
-            annotations:
-              summary: Site Down
-              description: No metrics received from the site proxy for at least 1 minute.
+              title: No {{ template "cluster-observability.title-name" . }} proxy metrics
+              description: No metrics received from the {{ template "cluster-observability.title-name" . }} proxy for at least 1 minute.
+    {{ end }}
