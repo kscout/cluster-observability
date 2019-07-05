@@ -5,7 +5,7 @@ metadata:
   labels:
     app: {{ .Values.global.app }}
     component: alertmanager
-    env: {{ .Values.global.app }}
+    env: {{ .Values.global.env }}
 data:
   alertmanager.yml: |
     global: {}

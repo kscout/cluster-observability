@@ -5,20 +5,20 @@ metadata:
   labels:
     app: {{ .Values.global.app }}
     component: alertmanager
-    env: {{ .Values.global.app }}
+    env: {{ .Values.global.env }}
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: {{ .Values.global.app }}
       component: alertmanager
-      env: {{ .Values.global.app }}
+      env: {{ .Values.global.env }}
   template:
     metadata:
       labels:
         app: {{ .Values.global.app }}
         component: alertmanager
-        env: {{ .Values.global.app }}
+        env: {{ .Values.global.env }}
     spec:
       volumes:
         - name: alertmanager-config

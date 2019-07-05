@@ -5,7 +5,7 @@ metadata:
   labels:
     app: {{ .Values.global.app }}
     component: prometheus
-    env: {{ .Values.global.app }}
+    env: {{ .Values.global.env }}
 data:
   prometheus.yml: |
     global:
