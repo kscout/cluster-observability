@@ -101,6 +101,7 @@ data:
 
     receivers:
     - name: kscout-slack
+      {{- if .Values.alertsEnabled }}
       slack_configs:
       - channel: '#kscout'
         api_url: '{{ .Values.alertmanager.slack_webhook }}'
@@ -108,3 +109,4 @@ data:
 {{ .Files.Get "_alertmanager-slack-message.tpl" | indent 10 }}
         send_resolved: true
         link_names: true
+      {{- end }}
