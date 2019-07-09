@@ -5,6 +5,7 @@ Prometheus + Alert Manager configuration for kscout.io OpenShift cluster.
 - [Overview](#overview)
 - [Deploy](#deploy)
 - [Add Service](#add-service)
+- [Access](#access)
 
 # Overview
 Deployment for Prometheus + Alert Manager observability stack.
@@ -25,3 +26,20 @@ in the [`values.yaml` file](values.yaml).
 See the comment explaining this array and existing entries for more information.
 
 This will trigger alerts when the service goes down.
+
+# Access
+To access deployed services first run:
+
+```
+make proxy
+```
+
+Then in another terminal run one of the following to open a service in 
+your browser:
+
+```
+make open-prometheus
+# Or
+make open-alertmanager
+```
+
