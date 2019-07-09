@@ -13,6 +13,9 @@ spec:
       app: {{ .Values.global.app }}
       component: prometheus
       env: {{ .Values.global.env }}
+  strategy:
+    type: Recreate
+    rollingUpdate: null
   template:
     metadata:
       labels:
@@ -36,19 +39,22 @@ spec:
             - name: prometheus-data
               mountPath: /mnt/data
           args:
-            - "--config.file=/mnt/config/prometheus.yml"
-            - "--storage.tsdb.path=/mnt/data"
+            - --config.file=/mnt/config/prometheus.yml
+            - --storage.tsdb.path=/mnt/data
+            - --web.enable-lifecycle
+            - --web.external-url=http://localhost:8001/api/v1/namespaces/{{ .Release.Namespace }}/services/{{ .Values.global.env }}-prometheus:web/proxy/
+            - --web.route-prefix=/
           ports:
             - name: web
               containerPort: 9090
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /
+              path: /graph
               port: web
               scheme: HTTP
           readinessProbe:
             httpGet:
-              path: /
+              path: /graph
               port: web
               scheme: HTTP
