@@ -1,5 +1,6 @@
 .PHONY: deploy deploy-prod deploy-staging \
-	rm-deploy
+	rm-deploy \
+	proxy open-prometheus open-alertmanager
 
 MAKE ?= make
 
@@ -8,7 +9,8 @@ APP ?= observability
 KUBE_LABELS ?= app=${APP},env=${ENV}
 KUBE_TYPES ?= deployment,configmap,service,pvc
 
-KUBE_APPLY ?= oc apply -f -
+KUBECTL ?= oc
+KUBE_APPLY ?= ${KUBECTL} apply -f -
 
 # deploy to ENV
 deploy:
@@ -34,3 +36,17 @@ rm-deploy:
 	@echo "Hit any key to confirm"
 	@read confirm
 	oc get -l ${KUBE_LABELS} ${KUBE_TYPES} -o yaml | oc delete -f -
+
+# start kube proxy
+proxy:
+	${KUBECTL} proxy
+
+# open prometheus for ENV via proxy
+open-prometheus:
+	@if [ -z "${ENV}" ]; then echo "ENV must be set"; exit 1; fi
+	xdg-open "http://localhost:8001/api/v1/namespaces/kscout/services/${ENV}-prometheus:web/proxy"
+
+# open alertmanager for ENV via proxy
+open-alertmanager:
+	@if [ -z "${ENV}" ]; then echo "ENV must be set"; exit 1; fi
+	xdg-open "http://localhost:8001/api/v1/namespaces/kscout/services/${ENV}-alertmanager:web/proxy"
