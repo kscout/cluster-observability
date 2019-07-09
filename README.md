@@ -31,7 +31,8 @@ Deployment for Prometheus + Alert Manager observability stack.
 To add a service to the observability stack add a value to the `services` list
 in the [`values.yaml` file](values.yaml).  
 
-See the comment explaining this array and existing entries for more information.
+See the comment explaining this array, and existing entries, for
+more information.
 
 This will trigger alerts when the service goes down.
 
