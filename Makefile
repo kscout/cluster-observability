@@ -1,4 +1,5 @@
 .PHONY: deploy deploy-prod deploy-staging \
+	restart-prometheus restart-alertmanager \
 	rm-deploy \
 	proxy open-prometheus open-alertmanager
 
@@ -28,6 +29,18 @@ deploy-prod:
 # deploy to staging
 deploy-staging:
 	${MAKE} deploy ENV=staging
+
+# restart prometheus for ENV
+restart-prometheus:
+	@if [ -z "${ENV}" ]; then echo "ENV must be set"; exit 1; fi
+	kubectl rollout restart deployment/${ENV}-prometheus
+	${KUBECTL} rollout status deployment/${ENV}-prometheus
+
+# restart alert manager for ENV
+restart-alertmanager:
+	@if [ -z "${ENV}" ]; then echo "ENV must be set"; exit 1; fi
+	kubectl rollout restart deployment/${ENV}-alertmanager
+	${KUBECTL} rollout status deployment/${ENV}-alertmanager
 
 # remove deployment for ENV
 rm-deploy:

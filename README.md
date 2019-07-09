@@ -18,14 +18,14 @@ Deployment for Prometheus + Alert Manager observability stack.
    ```
    make deploy-prod
    ```
-4. (Optional) If the deployment included a ConfigMap change:
+4. (Optional) If the deployment included a ConfigMap change run the appropriate
+   make target for the service with the ConfigMap change:
    ```
-   kubectl rollout restart deployment/ENV-SVC
+   make restart-prometheus ENV=prod
+   # Or
+   make restart-alertmanager ENV=prod
    ```
-   Where `ENV` is the deployment environment and `SVC` is the service with the 
-   modified ConfigMap.  
-   *Note: `oc` may not be substituted for `kubectl` as it does not implement the
-   `rollout restart` command.*
+
 
 # Add Service
 To add a service to the observability stack add a value to the `services` list
