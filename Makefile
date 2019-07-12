@@ -8,7 +8,7 @@ MAKE ?= make
 APP ?= observe
 
 KUBE_LABELS ?= app=${APP},env=${ENV}
-KUBE_TYPES ?= deployment,configmap,service
+KUBE_TYPES ?= configmap,deployment,statefulset,service
 
 KUBECTL ?= oc
 KUBE_APPLY ?= ${KUBECTL} apply -f -
