@@ -7,13 +7,15 @@ metadata:
     component: alertmanager
     env: {{ .Values.global.env }}
 spec:
-  type: NodePort
   ports:
   - name: web
     port: 9093
-    nodePort: 30930
     protocol: TCP
     targetPort: web
+  - name: discovery
+    port: 6783
+    protocol: TCP
+    targetPort: discovery
   selector:
     app: {{ .Values.global.app }}
     component: alertmanager

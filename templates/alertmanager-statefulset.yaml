@@ -37,15 +37,26 @@ spec:
           volumeMounts:
             - name: alertmanager-config
               mountPath: /mnt/config
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
           args:
             - "--config.file=/mnt/config/alertmanager.yml"
             - "--storage.path=/tmp/alertmanager"
-            {{- range $i, $v := until (.Values.alertmanager.replicas | int) }}
-            - "--cluster.peer={{ $.Values.global.env }}-alertmanager-{{ $i }}:9093"
+            - "--cluster.advertise-address=$(POD_IP):6783" # From .env
+            - "--cluster.listen-address=0.0.0.0:6783"
+            {{- range $n := until (.Values.alertmanager.replicas | int) }}
+            - "--cluster.peer={{ $.Values.global.env }}-alertmanager-{{ $n }}.{{ $.Values.global.env }}-alertmanager:6783"
             {{- end }}
           ports:
             - name: web
               containerPort: 9093
+              protocol: TCP
+            - name: discovery
+              containerPort: 6783
               protocol: TCP
           livenessProbe:
             httpGet:
