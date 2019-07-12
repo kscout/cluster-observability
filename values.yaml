@@ -32,3 +32,5 @@ services:
     slack_maintainers: '@jawalter'
   - name: chat-bot-api
     slack_maintainers: '@vhire @pmahajan'
+  - name: slack-chat-bot-api
+    slack_maintainers: '@vhire @pmahajan'
