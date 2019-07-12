@@ -1,0 +1,30 @@
+{{/*
+Evaluated as template with root context.
+*/}}
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets:
+       {{- range $i, $v := until (.Values.alertmanager.replicas | int) }}
+       - "{{ $.Values.global.env }}-alertmanager-{{ $i }}:9093"
+       {{- end }}
+
+rule_files:
+  - "/mnt/config/alert_rules.yml"
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+    - targets: ['localhost:9090'] # Prometheus self metrics
+
+  - job_name: 'services'
+    static_configs:
+    - targets:
+        {{ range .Values.services }}
+        {{- $_ := dict "env" $.Values.global.env "name" .name -}}
+        - '{{ template "cluster-observability.metrics-svc" $_ }}'
+        {{ end }}

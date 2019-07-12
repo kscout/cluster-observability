@@ -7,46 +7,7 @@ metadata:
     component: prometheus
     env: {{ .Values.global.env }}
 data:
-  prometheus.yml: |
-    global:
-      scrape_interval:     15s
-      evaluation_interval: 15s
-
-    alerting:
-      alertmanagers:
-      - static_configs:
-        - targets:
-           - alertmanager:9093
-           
-    rule_files:
-      - "/mnt/config/alert_rules.yml"
-      
-    scrape_configs:
-      - job_name: 'prometheus'
-        static_configs:
-        - targets: ['localhost:9090'] # Prometheus self metrics
-
-      - job_name: 'services'
-        static_configs:
-        - targets:
-            {{ range .Values.services }}
-            {{- $_ := dict "env" $.Values.global.env "name" .name -}}
-            - '{{ template "cluster-observability.metrics-svc" $_ }}:9180'
-            {{ end }}
-  alert_rules.yml: |
-    groups:
-    {{ range .Values.services }}
-    {{ $_ := dict "env" $.Values.global.env "name" .name }}
-      - name: {{ .name }}
-        rules:
-          - alert: {{ template "cluster-observability.title-name" . }} Metrics Down
-            expr: up{instance="{{ template "cluster-observability.metrics-svc" $_ }}"} < 1
-            for: 1m
-            labels:
-              app: {{ .name }}
-              maintainers: '{{ .slack_maintainers }}'
-              severity: critical
-            annotations:
-              title: No {{ template "cluster-observability.title-name" . }} proxy metrics
-              description: No metrics received from the {{ template "cluster-observability.title-name" . }} proxy for at least 1 minute.
-    {{ end }}
+  {{- range $path, $_ := .Files.Glob "config/prometheus/*" }}
+  {{ $path | base }}: |
+{{ tpl ($.Files.Get $path) $ | indent 4 }}
+  {{- end }}

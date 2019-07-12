@@ -7,7 +7,7 @@ metadata:
     component: prometheus
     env: {{ .Values.global.env }}
 spec:
-  replicas: 3
+  replicas: {{ .Values.prometheus.replicas }}
   selector:
     matchLabels:
       app: {{ .Values.global.app }}
@@ -19,6 +19,10 @@ spec:
         app: {{ .Values.global.app }}
         component: prometheus
         env: {{ .Values.global.env }}
+      annotations:
+        {{- range $path, $_ := .Files.Glob "config/prometheus/*" }}
+        config-{{ $path | base }}-sha256sum: {{ tpl ($.Files.Get $path) $ | sha256sum }}
+        {{- end }}
     spec:
       volumes:
         - name: prometheus-config
@@ -30,10 +34,9 @@ spec:
           volumeMounts:
             - name: prometheus-config
               mountPath: /mnt/config
-            - name: prometheus-data
-              mountPath: /mnt/data
           args:
             - --config.file=/mnt/config/prometheus.yml
+            - --storage.tsdb.path=/tmp/prometheus
             - --web.enable-lifecycle
             - --web.external-url=http://localhost:8001/api/v1/namespaces/{{ .Release.Namespace }}/services/{{ .Values.global.env }}-prometheus:web/proxy/
             - --web.route-prefix=/

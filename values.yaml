@@ -1,12 +1,23 @@
 # Global chart configuration
-global:
-  app: observe
+#global:
+  # App name
+  #app:
 
   # Deployment environment
   #env:
 
-# Specifies if alerts should be setup
-alertsEnabled: True
+# Prometheus configuration
+prometheus:
+  # Number of duplicate prometheus instances
+  replicas: 3
+
+# Alert manager configuration
+alertmanager:
+  # Number of replicas in alertmanager highly available cluster
+  replicas: 3
+
+  # Specifies if alerts should be setup
+  alertsEnabled: True
 
 # Services to monitor
 services:
@@ -19,5 +30,5 @@ services:
     slack_maintainers: '@nhuppert @pmahajan'
   - name: site
     slack_maintainers: '@jawalter'
-  - name: bot-api
+  - name: chat-bot-api
     slack_maintainers: '@vhire @pmahajan'

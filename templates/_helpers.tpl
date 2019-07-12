@@ -13,7 +13,7 @@ $_ := dict "env" $.Values.global.env "name" .name
 Assuming the above is run with its context being one of the .Values.services items
 */}}
 {{- define "cluster-observability.metrics-svc" -}}
-{{ .env }}-{{ .name }}-metrics
+{{ .env }}-{{ .name }}-metrics:9180
 {{- end -}}
 
 {{/*

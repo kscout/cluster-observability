@@ -1,0 +1,19 @@
+{{/*
+Template evaluated with root context.
+*/}}
+groups:
+{{ range .Values.services }}
+{{ $_ := dict "env" $.Values.global.env "name" .name }}
+  - name: {{ .name }}
+    rules:
+      - alert: {{ template "cluster-observability.title-name" . }} Metrics Down
+        expr: up{instance="{{ template "cluster-observability.metrics-svc" $_ }}"} < 1
+        for: 1m
+        labels:
+          app: {{ .name }}
+          maintainers: '{{ .slack_maintainers }}'
+          severity: critical
+        annotations:
+          title: No {{ template "cluster-observability.title-name" . }} proxy metrics
+          description: No metrics received from the {{ template "cluster-observability.title-name" . }} proxy for at least 1 minute.
+{{ end }}

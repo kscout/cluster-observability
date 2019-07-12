@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ .Values.global.env }}-alertmanager
   labels:
@@ -7,18 +7,25 @@ metadata:
     component: alertmanager
     env: {{ .Values.global.env }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.alertmanager.replicas }}
   selector:
     matchLabels:
       app: {{ .Values.global.app }}
       component: alertmanager
       env: {{ .Values.global.env }}
+  serviceName: {{ .Values.global.app }}-alertmanager
+  updateStrategy:
+    type: RollingUpdate
   template:
     metadata:
       labels:
         app: {{ .Values.global.app }}
         component: alertmanager
         env: {{ .Values.global.env }}
+      annotations:
+        {{- range $path, $_ := .Files.Glob "config/alertmanager/*" }}
+        config-{{ $path | base }}-sha256sum: {{ tpl ($.Files.Get $path) $ | sha256sum }}
+        {{- end }}
     spec:
       volumes:
         - name: alertmanager-config
@@ -30,10 +37,12 @@ spec:
           volumeMounts:
             - name: alertmanager-config
               mountPath: /mnt/config
-            - name: alertmanager-data
-              mountPath: /mnt/data
           args:
             - "--config.file=/mnt/config/alertmanager.yml"
+            - "--storage.path=/tmp/alertmanager"
+            {{- range $i, $v := until (.Values.alertmanager.replicas | int) }}
+            - "--cluster.peer={{ $.Values.global.env }}-alertmanager-{{ $i }}:9093"
+            {{- end }}
           ports:
             - name: web
               containerPort: 9093

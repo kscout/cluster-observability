@@ -5,7 +5,7 @@
 
 MAKE ?= make
 
-APP ?= observability
+APP ?= observe
 
 KUBE_LABELS ?= app=${APP},env=${ENV}
 KUBE_TYPES ?= deployment,configmap,service
@@ -19,6 +19,7 @@ deploy:
 	helm template \
 		--values values.yaml \
 		--values values.secrets.${ENV}.yaml \
+		--set global.app=${APP} \
 		--set global.env=${ENV} . \
 	| ${KUBE_APPLY}
 
