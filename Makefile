@@ -8,7 +8,7 @@ MAKE ?= make
 APP ?= observability
 
 KUBE_LABELS ?= app=${APP},env=${ENV}
-KUBE_TYPES ?= deployment,configmap,service,pvc
+KUBE_TYPES ?= deployment,configmap,service
 
 KUBECTL ?= oc
 KUBE_APPLY ?= ${KUBECTL} apply -f -

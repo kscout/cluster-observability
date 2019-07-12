@@ -24,9 +24,6 @@ spec:
         - name: alertmanager-config
           configMap:
             name: {{ .Values.global.env }}-alertmanager-config
-        - name: alertmanager-data
-          persistentVolumeClaim:
-            claimName: {{ .Values.global.env }}-alertmanager-data
       containers:
         - name: alertmanager
           image: quay.io/prometheus/alertmanager:latest
@@ -37,7 +34,6 @@ spec:
               mountPath: /mnt/data
           args:
             - "--config.file=/mnt/config/alertmanager.yml"
-            - "--storage.path=/mnt/data"
           ports:
             - name: web
               containerPort: 9093
