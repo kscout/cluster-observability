@@ -1,0 +1,16 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Values.global.env }}-prometheus-role
+  labels:
+    app: {{ .Values.global.app }}
+    component: prometheus
+    env: {{ .Values.global.env }}
+rules:
+  - resources:
+      - pods
+    verbs:
+      - get
+      - watch
+      - list
+    apiGroups: [""]
