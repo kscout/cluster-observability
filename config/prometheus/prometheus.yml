@@ -21,10 +21,93 @@ scrape_configs:
     static_configs:
     - targets: ['localhost:9090'] # Prometheus self metrics
 
-  - job_name: 'services'
-    static_configs:
-    - targets:
-        {{ range .Values.services }}
-        {{- $_ := dict "env" $.Values.global.env "name" .name -}}
-        - '{{ template "cluster-observability.metrics-svc" $_ }}'
-        {{ end }}
+  - job_name: 'blackbox-exporter'
+    metrics_path: /probe
+    params:
+      module: [https_2xx]
+    kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names: ['{{ .Values.global.namespace }}']
+    relabel_configs:
+      # Only keep target if app matches charts' app
+      - action: keep
+        regex: {{ .Values.global.app }}
+        source_labels:
+          - __meta_kubernetes_pod_label_app
+          
+      # Only keep target if env matches chart's
+      - action: keep
+        regex: {{ .Values.global.env }}
+        source_labels:
+          - __meta_kubernetes_pod_label_env
+
+      # Only keep target if component == blackbox-exporter
+      - action: keep
+        regex: blackbox-exporter
+        source_labels:
+          - __meta_kubernetes_pod_label_component
+
+      # Set job to app label
+      - action: replace
+        target_label: job
+        source_labels:
+          - __meta_kubernetes_pod_label_app
+
+      # Set pod label
+      - action: replace
+        target_label: pod
+        source_labels:
+          - __meta_kubernetes_pod_name
+
+      # Set component and env labels based on pod labels
+      - action: replace
+        target_label: component
+        source_labels:
+          - __meta_kubernetes_pod_label_component
+      - action: replace
+        target_label: env
+        source_labels:
+          - __meta_kubernetes_pod_label_env
+
+  # Scrape all metrics container ports
+  - job_name: services
+    kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names: ['{{ .Values.global.namespace }}']
+    relabel_configs:
+      # Only keep target if env matches chart's
+      - action: keep
+        regex: {{ .Values.global.env }}
+        source_labels:
+          - __meta_kubernetes_pod_label_env
+
+      # Only keep target pod container if a metrics port is exposed
+      - action: keep
+        regex: '{{ .Values.scrapePortsRegex }}'
+        source_labels:
+          - __meta_kubernetes_pod_container_port_number
+
+      # Set job to app label
+      - action: replace
+        target_label: job
+        source_labels:
+          - __meta_kubernetes_pod_label_app
+
+      # Set pod label
+      - action: replace
+        target_label: pod
+        source_labels:
+          - __meta_kubernetes_pod_name
+
+      # Set component and env labels based on pod labels
+      - action: replace
+        target_label: component
+        source_labels:
+          - __meta_kubernetes_pod_label_component
+          
+      - action: replace
+        target_label: env
+        source_labels:
+          - __meta_kubernetes_pod_label_env

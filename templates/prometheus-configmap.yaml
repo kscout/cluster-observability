@@ -8,6 +8,6 @@ metadata:
     env: {{ .Values.global.env }}
 data:
   {{- range $path, $_ := .Files.Glob "config/prometheus/*" }}
-  {{ $path | base }}: |
+  {{ $path | base }}: |-
 {{ tpl ($.Files.Get $path) $ | indent 4 }}
   {{- end }}
