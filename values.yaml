@@ -6,6 +6,8 @@
   # Deployment environment
   #env:
 
+  #namespace:
+
 # Prometheus configuration
 prometheus:
   # Number of duplicate prometheus instances

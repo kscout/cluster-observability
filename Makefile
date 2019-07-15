@@ -7,6 +7,7 @@ MAKE ?= make
 
 APP ?= observe
 
+KUBE_NS ?= kscout
 KUBE_LABELS ?= app=${APP},env=${ENV}
 KUBE_TYPES ?= configmap,deployment,statefulset,service
 
@@ -19,6 +20,7 @@ deploy:
 	helm template \
 		--values values.yaml \
 		--values values.secrets.${ENV}.yaml \
+		--set global.namespace=${KUBE_NS} \
 		--set global.app=${APP} \
 		--set global.env=${ENV} . \
 	| ${KUBE_APPLY}
