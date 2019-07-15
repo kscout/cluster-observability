@@ -18,7 +18,7 @@ groups:
           description: No metrics received from the {{ template "cluster-observability.title-name" . }} proxy for at least 1 minute.
           host: {{ .host }}
       - alert: {{ template "cluster-observability.title-name" . }} Ping Failed
-        expr: up{job="blackbox-exporter",instance="{{ .host }}"} < 1
+        expr: up{job="blackbox-exporter",app="{{ .name }}"} < 1
         for: 1m
         labels:
           app: {{ .name }}

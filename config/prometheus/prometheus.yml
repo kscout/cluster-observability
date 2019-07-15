@@ -26,27 +26,39 @@ scrape_configs:
     params:
       module: [https_2xx]
     static_configs:
+      # For each service put name and host separated by semicolon
+      # in __param_target
       - targets:
         {{- range .Values.services }}
-        - {{ .host }}
+        - {{ .name }};{{ .host }}
         {{- end }}
     relabel_configs:
+      # Set module label
+      - target_label: module
+        source_labels:
+          - __param_module
+
+      # Set app and env label
+      - target_label: app
+        source_labels:
+          - __address__
+        regex: ^(.+);.+$
+      - target_label: env
+        replacement: {{ .Values.global.env }}
+        
       # Set __param_target and instance labels to probe target host
+      # __param_target will be passed to blackbox-exporter as "target"
       - target_label: __param_target
         source_labels:
           - __address__
+        regex: ^.+;(.+)$
       - target_label: instance
         source_labels:
           - __param_target
 
       # Set address to blackbox exporter
       - target_label: __address__
-        replacement: prod-blackbox-exporter:9115 # The blackbox exporter.
-
-      # Set module label
-      - target_label: module
-        source_labels:
-          - __param_module
+        replacement: {{ .Values.global.env }}-blackbox-exporter:9115 # The blackbox exporter.
 
   # Scrape all metrics container ports
   - job_name: services
