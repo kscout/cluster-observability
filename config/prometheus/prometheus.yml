@@ -32,14 +32,21 @@ scrape_configs:
         {{- end }}
     relabel_configs:
       # Set __param_target and instance labels to probe target host
-      - source_labels: [__address__]
-        target_label: __param_target
-      - source_labels: [__param_target]
-        target_label: instance
+      - target_label: __param_target
+        source_labels:
+          - __address__
+      - target_label: instance
+        source_labels:
+          - __param_target
 
       # Set address to blackbox exporter
       - target_label: __address__
         replacement: prod-blackbox-exporter:9115 # The blackbox exporter.
+
+      # Set module label
+      - target_label: module
+        source_labels:
+          - __param_module
 
   # Scrape all metrics container ports
   - job_name: services
