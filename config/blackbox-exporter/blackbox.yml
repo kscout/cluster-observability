@@ -7,3 +7,5 @@ modules:
       fail_if_not_ssl: True
       tls_config:
         insecure_skip_verify: False
+      preferred_ip_protocol: "ip4"
+      ip_protocol_fallback: false
