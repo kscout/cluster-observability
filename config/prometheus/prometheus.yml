@@ -9,8 +9,8 @@ alerting:
   alertmanagers:
   - static_configs:
     - targets:
-       {{- range $i, $v := until (.Values.alertmanager.replicas | int) }}
-       - "{{ $.Values.global.env }}-alertmanager-{{ $i }}:9093"
+       {{- range $n := until (.Values.alertmanager.replicas | int) }}
+       - "{{ $.Values.global.env }}-alertmanager-{{ $n }}.{{ $.Values.global.env }}-alertmanager:9093"
        {{- end }}
 
 rule_files:
