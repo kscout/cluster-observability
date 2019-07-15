@@ -2,30 +2,29 @@
 Template evaluated with root context.
 */}}
 groups:
+  - name: all-targets
+    rules:
+      - alert: Metrics target down
+        expr: up < 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          title: Metrics target down
+          description: A target which is scraped for metrics has not been reachable for at least 1 minute.
 {{ range .Values.services }}
 {{ $_ := dict "env" $.Values.global.env "name" .name }}
   - name: {{ .name }}
     rules:
-      - alert: {{ template "cluster-observability.title-name" . }} Metrics Down
-        expr: up{job="{{ .name }}"} < 1
+      - alert: {{ template "cluster-observability.title-name" . }} ping failed
+        expr: probe_success{job="blackbox-exporter",app="{{ .name }}"} < 1
         for: 1m
         labels:
           app: {{ .name }}
           maintainers: '{{ .slack_maintainers }}'
           severity: critical
-        annotations:
-          title: No {{ template "cluster-observability.title-name" . }} proxy metrics
-          description: No metrics received from the {{ template "cluster-observability.title-name" . }} proxy for at least 1 minute.
           host: {{ .host }}
-      - alert: {{ template "cluster-observability.title-name" . }} Ping Failed
-        expr: up{job="blackbox-exporter",app="{{ .name }}"} < 1
-        for: 1m
-        labels:
-          app: {{ .name }}
-          maintainers: '{{ .slack_maintainers }}'
-          severity: critical
         annotations:
-          title: Ping failed {{ template "cluster-observability.title-name" . }}
+          title: Failed to ping {{ template "cluster-observability.title-name" . }}
           description: The blackbox exporter failed to ping the {{ template "cluster-observability.title-name" . }} for at least 1 minute.
-          host: {{ .host }}
 {{ end }}
