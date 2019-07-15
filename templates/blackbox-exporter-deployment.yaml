@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.global.env }}-blackbox-exporter
+  labels:
+    app: {{ .Values.global.app }}
+    component: blackbox-exporter
+    env: {{ .Values.global.env }}
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: {{ .Values.global.app }}
+      component: blackbox-exporter
+      env: {{ .Values.global.env }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.global.app }}
+        component: blackbox-exporter
+        env: {{ .Values.global.env }}
+      annotations:
+        {{- range $path, $_ := .Files.Glob "config/blackbox-exporter/*" }}
+        config-{{ $path | base }}-sha256sum: {{ tpl ($.Files.Get $path) $ | sha256sum }}
+        {{- end }}
+    spec:
+      volumes:
+        - name: blackbox-exporter-config
+          configMap:
+            name: {{ .Values.global.env }}-blackbox-exporter-config
+      containers:
+        - name: blackbox-exporter
+          image: quay.io/prometheus/blackbox-exporter
+          volumeMounts:
+            - name: blackbox-exporter-config
+              mountPath: /mnt/config
+          args:
+            - "--config.file=/mnt/config/blackbox.yml"
+          ports:
+            - name: metrics
+              containerPort: 9115
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /#/health
+              port: metrics
+              scheme: HTTP
+          readinessProbe:
+            httpGet:
+              path: /#/health
+              port: metrics
+              scheme: HTTP
