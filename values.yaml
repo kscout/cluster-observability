@@ -6,6 +6,8 @@
   # Deployment environment
   #env:
 
+  #namespace:
+
 # Prometheus configuration
 prometheus:
   # Number of duplicate prometheus instances
@@ -19,18 +21,28 @@ alertmanager:
   # Specifies if alerts should be setup
   alertsEnabled: True
 
+# scrapePortsRegex matches ports which should be scanned on pods
+scrapePortsRegex: 9180
+
 # Services to monitor
 services:
   #  Name of service without environment prefix or component postfix
+  #  Should match the expression /[0-9a-zA-Z-_]+/
   #- name:
   #  Space separated list of maintainer Slack handles
   #  Will be pinged if an alert is triggered for this service
   #  slack_maintainers:
+  #  External network traffic host
+  #  host:
   - name: serverless-registry-api
     slack_maintainers: '@nhuppert @pmahajan'
+    host: api.kscout.io
   - name: site
     slack_maintainers: '@jawalter'
+    host: kscout.io
   - name: chat-bot-api
     slack_maintainers: '@vhire @pmahajan'
+    host: bot.kscout.io
   - name: slack-chat-bot-api
     slack_maintainers: '@vhire @pmahajan'
+    host: slack-bot.kscout.io

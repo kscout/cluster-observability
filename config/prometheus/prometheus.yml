@@ -9,8 +9,8 @@ alerting:
   alertmanagers:
   - static_configs:
     - targets:
-       {{- range $i, $v := until (.Values.alertmanager.replicas | int) }}
-       - "{{ $.Values.global.env }}-alertmanager-{{ $i }}:9093"
+       {{- range $n := until (.Values.alertmanager.replicas | int) }}
+       - "{{ $.Values.global.env }}-alertmanager-{{ $n }}.{{ $.Values.global.env }}-alertmanager:9093"
        {{- end }}
 
 rule_files:
@@ -19,12 +19,84 @@ rule_files:
 scrape_configs:
   - job_name: 'prometheus'
     static_configs:
-    - targets: ['localhost:9090'] # Prometheus self metrics
+      - targets: ['localhost:9090'] # Prometheus self metrics
 
-  - job_name: 'services'
+  - job_name: 'blackbox-exporter'
+    metrics_path: /probe
+    params:
+      module: [https_2xx]
     static_configs:
-    - targets:
-        {{ range .Values.services }}
-        {{- $_ := dict "env" $.Values.global.env "name" .name -}}
-        - '{{ template "cluster-observability.metrics-svc" $_ }}'
-        {{ end }}
+      # For each service put name and host separated by semicolon
+      # in __param_target
+      - targets:
+        {{- range .Values.services }}
+        - {{ .name }};{{ .host }}
+        {{- end }}
+    relabel_configs:
+      # Set module label
+      - target_label: module
+        source_labels:
+          - __param_module
+
+      # Set app and env label
+      - target_label: app
+        source_labels:
+          - __address__
+        regex: ^(.+);.+$
+      - target_label: env
+        replacement: {{ .Values.global.env }}
+        
+      # Set probe target to service {{ .host }}/health
+      - target_label: __param_target
+        source_labels:
+          - __address__
+        regex: ^.+;(.+)$
+        replacement: $1/health
+
+      # Set instance label to {{ .host }}
+      - target_label: instance
+        source_labels:
+          - __address__
+        regex: ^.+;(.+)$
+
+      # Set address to blackbox exporter
+      - target_label: __address__
+        replacement: {{ .Values.global.env }}-blackbox-exporter:9115 # The blackbox exporter.
+
+  # Scrape all metrics container ports
+  - job_name: services
+    kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names: ['{{ .Values.global.namespace }}']
+    relabel_configs:
+      # Only keep target if env matches chart's
+      - action: keep
+        regex: {{ .Values.global.env }}
+        source_labels:
+          - __meta_kubernetes_pod_label_env
+
+      # Only keep target pod container if a metrics port is exposed
+      - action: keep
+        regex: '{{ .Values.scrapePortsRegex }}'
+        source_labels:
+          - __meta_kubernetes_pod_container_port_number
+
+      # Set job to app label
+      - target_label: job
+        source_labels:
+          - __meta_kubernetes_pod_label_app
+
+      # Set pod label
+      - target_label: pod
+        source_labels:
+          - __meta_kubernetes_pod_name
+
+      # Set component and env labels based on pod labels
+      - target_label: component
+        source_labels:
+          - __meta_kubernetes_pod_label_component
+          
+      - target_label: env
+        source_labels:
+          - __meta_kubernetes_pod_label_env
