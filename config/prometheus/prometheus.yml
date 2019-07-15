@@ -68,24 +68,20 @@ scrape_configs:
           - __meta_kubernetes_pod_container_port_number
 
       # Set job to app label
-      - action: replace
-        target_label: job
+      - target_label: job
         source_labels:
           - __meta_kubernetes_pod_label_app
 
       # Set pod label
-      - action: replace
-        target_label: pod
+      - target_label: pod
         source_labels:
           - __meta_kubernetes_pod_name
 
       # Set component and env labels based on pod labels
-      - action: replace
-        target_label: component
+      - target_label: component
         source_labels:
           - __meta_kubernetes_pod_label_component
           
-      - action: replace
-        target_label: env
+      - target_label: env
         source_labels:
           - __meta_kubernetes_pod_label_env
