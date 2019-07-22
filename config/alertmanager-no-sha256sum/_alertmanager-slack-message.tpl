@@ -7,7 +7,7 @@
 
 {{- if .Labels }}
 *Labels*:
-{{- $key, $value := range .Labels }}
+{{- range $key, $value := .Labels }}
     - *{{ $key }}*: `{{ $value }}`
 {{- end }}
 {{- end }}
