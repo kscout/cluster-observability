@@ -22,7 +22,7 @@ alertmanager:
   alertsEnabled: True
 
 # scrapePortsRegex matches ports which should be scanned on pods
-scrapePortsRegex: 9180
+scrapePortsRegex: 9180|9090
 
 # Services to monitor
 services:
