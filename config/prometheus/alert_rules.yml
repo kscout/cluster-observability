@@ -2,18 +2,9 @@
 Template evaluated with root context.
 */}}
 groups:
-  - name: all-targets
-    rules:
-      - alert: Metrics target down
-        expr: up < 1
-        for: 1m
-        labels:
-          severity: critical
-        annotations:
-          title: Metrics target down
-          description: A target which is scraped for metrics has not been reachable for at least 1 minute.
 {{ range .Values.services }}
 {{ $_ := dict "env" $.Values.global.env "name" .name }}
+  # Alert when external ping for {{ .name }} fails
   - name: {{ .name }}
     rules:
       - alert: {{ template "cluster-observability.title-name" . }} ping failed
