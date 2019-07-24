@@ -18,14 +18,10 @@ Deployment for Prometheus + Alert Manager observability stack.
    ```
    make deploy-prod
    ```
-4. (Optional) If the deployment included a ConfigMap change run the appropriate
-   make target for the service with the ConfigMap change:
-   ```
-   make restart-prometheus ENV=prod
-   # Or
-   make restart-alertmanager ENV=prod
-   ```
-
+4. (First deploy only) Login to Grafana and create an organization with the name
+   in the `grafana.
+   
+   Then you can login as an anonymous user.
 
 # Add Service
 To add a service to the observability stack add a value to the `services` list

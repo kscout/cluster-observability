@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.global.env }}-grafana
+  labels:
+    app: {{ .Values.global.app }}
+    component: grafana
+    env: {{ .Values.global.env }}
+spec:
+  replicas: {{ .Values.grafana.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.global.app }}
+      component: grafana
+      env: {{ .Values.global.env }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.global.app }}
+        component: grafana
+        env: {{ .Values.global.env }}
+      annotations:
+        {{- range $path, $_ := .Files.Glob "config/grafana/*" }}
+        config-{{ $path | base }}-sha256sum: {{ tpl ($.Files.Get $path) $ | sha256sum }}
+        {{- end }}
+    spec:
+      volumes:
+        - name: grafana-config
+          configMap:
+            name: {{ .Values.global.env }}-grafana-config
+      containers:
+        - name: grafana
+          image: docker.io/grafana/grafana:latest
+          volumeMounts:
+            - name: grafana-config
+              mountPath: /mnt/config
+          args:
+            - "--config=/mnt/config/grafana.ini"
+          env:
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.env }}-grafana-creds
+                  key: adminPassword
+          ports:
+            - name: web
+              containerPort: {{ .Values.grafana.containerPort }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: web
+              scheme: HTTP
+          readinessProbe:
+            httpGet:
+              path: /
+              port: web
+              scheme: HTTP

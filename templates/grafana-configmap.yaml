@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.global.env }}-grafana-config
+  labels:
+    app: {{ .Values.global.app }}
+    component: grafana
+    env: {{ .Values.global.env }}
+data:
+  {{- range $path, $_ := .Files.Glob "config/grafana/*" }}
+  {{ $path | base }}: |
+{{ tpl ($.Files.Get $path) $ | indent 4 }}
+  {{- end }}

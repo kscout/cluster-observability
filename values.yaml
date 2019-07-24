@@ -21,6 +21,17 @@ alertmanager:
   # Specifies if alerts should be setup
   alertsEnabled: True
 
+# Grafana configuration
+grafana:
+  # Number of duplicate grafana instances
+  replicas: 3
+
+  # Name of organization which all users will be part of
+  organization: KScout
+
+  # Container port to run server on
+  containerPort: 3000
+
 # scrapePortsRegex matches ports which should be scanned on pods
 scrapePortsRegex: 9180|9090
 

@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.global.env }}-grafana
+  labels:
+    app: {{ .Values.global.app }}
+    component: grafana
+    env: {{ .Values.global.env }}
+spec:
+  ports:
+  - name: web
+    port: 3000
+    protocol: TCP
+    targetPort: web
+  selector:
+    app: {{ .Values.global.app }}
+    component: grafana
+    env: {{ .Values.global.env }}

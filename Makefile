@@ -1,7 +1,7 @@
 .PHONY: deploy deploy-prod deploy-staging \
 	restart-prometheus restart-alertmanager \
 	rm-deploy \
-	proxy open-prometheus open-alertmanager
+	proxy open-prometheus open-alertmanager open-grafana
 
 MAKE ?= make
 
@@ -57,12 +57,17 @@ rm-deploy:
 proxy:
 	${KUBECTL} proxy
 
-# open prometheus for ENV via proxy, defaults to prod
+# open prometheus for ENV via proxy, defaults to ENV=prod
 open-prometheus:
 	$(eval ENV ?= prod)
 	xdg-open "http://localhost:8001/api/v1/namespaces/kscout/services/${ENV}-prometheus:web/proxy"
 
-# open alertmanager for ENV via proxy, defaults to prod
+# open alertmanager for ENV via proxy, defaults to ENV=prod
 open-alertmanager:
 	$(eval ENV ?= prod)
 	xdg-open "http://localhost:8001/api/v1/namespaces/kscout/services/${ENV}-alertmanager:web/proxy"
+
+# open grafana for ENV via proxy, defaults to ENV=prod
+open-grafana:
+	$(eval ENV ?= prod)
+	xdg-open "http://localhost:8001/api/v1/namespaces/kscout/services/${ENV}-grafana:web/proxy"
