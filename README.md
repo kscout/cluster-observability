@@ -47,9 +47,9 @@ Then in another terminal run one of the following to open a service in
 your browser:
 
 ```
-make open-prometheus ENV=<env>
+make open-prometheus 
 # Or
-make open-alertmanager ENV=<env>
+make open-alertmanager
 ```
 
 Replace `<env>` with an environment.
